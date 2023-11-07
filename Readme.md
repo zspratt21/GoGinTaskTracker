@@ -44,7 +44,7 @@ You can either launch the docker containers from your IDE or use the start-conta
 make start-containers
 ```
 
-Use an API client such as ARC or Postman, to make requests to the API. By default, the API is hosted at http://localhost:8000. The following endpoints are available:
+Use an API client such as ARC or Postman, to make requests to the API. By default, the API is hosted at http://localhost:9001. The following endpoints are available:
 #### GET /api/Tasks
 Returns a list of all tasks.
 #### GET /api/Tasks/{id}
