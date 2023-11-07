@@ -1,14 +1,5 @@
 # Go Gin DynamoDB API Template
-
-This is a template project for a Golang Gin based REST API that uses DynamoDB as a database.
-
-## Features
-
-- [x] Dockerized local dev environment with Air for hot reloading and a local DynamoDB instance.
-- [x] [Gin](https://gin-gonic.com/)
-- [x] [AWS SDK](https://github.com/aws/aws-sdk-go)
-- [x] Unit tests for JSON Marshalling
-- [x] Makefile for common docker tasks and building binaries for different platforms
+An API for tracking tasks, built using Golang and the Gin web framework.
 
 ## Getting Started
 
@@ -53,12 +44,28 @@ You can either launch the docker containers from your IDE or use the start-conta
 make start-containers
 ```
 
-### Using the example colors crud api
+Use an API client such as ARC or Postman, to make requests to the API. By default, the API is hosted at http://localhost:8000. The following endpoints are available:
+#### GET /api/Tasks
+Returns a list of all tasks.
+#### GET /api/Tasks/{id}
+Returns a single task with the specified id.
+#### POST /api/Tasks
+Creates a new task. The request body should contain a JSON object with the following properties:
+- name (string)
+- isCompleted (bool)
+#### PUT /api/Tasks/{id}
+Updates an existing task with the specified id. The request body should contain a JSON object with the following properties:
+- id (int)
+- name (string)
+- isCompleted (bool)
+#### DELETE /api/Tasks/{id}
+Deletes an existing task with the specified id.
 
-The example api is a simple CRUD api for colors. It has the following endpoints:
-
-- GET /colors - Returns all colors
-- GET /colors/:id - Returns a color by id
-- POST /colors - Creates a new color
-- PUT /colors/:id - Updates a color by id
-- DELETE /colors/:id - Deletes a color by id
+## Made With
+- [Go](https://golang.org/)
+- [Gin](https://gin-gonic.com/)
+- [AWS SDK for Go](https://aws.amazon.com/sdk-for-go/)
+- [DynamoDB](https://aws.amazon.com/dynamodb/)
+- [Docker](https://www.docker.com/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Goland](https://www.jetbrains.com/go/)

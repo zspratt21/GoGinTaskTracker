@@ -7,16 +7,19 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
-func AddColor(c *gin.Context) {
-	var color models.Color
+func AddTask(c *gin.Context) {
+	var task models.Task
 
-	if err := c.ShouldBindJSON(&color); err != nil {
+	if err := c.ShouldBindJSON(&task); err != nil {
 		c.JSON(400, gin.H{"error": "Invalid request format"})
 		return
 	}
 
+	task.Id = uuid.New().String()
+
 	sess, err := database.NewSession()
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Failed to create AWS session"})
@@ -24,26 +27,26 @@ func AddColor(c *gin.Context) {
 	}
 	svc := dynamodb.New(sess)
 
-	av, err := dynamodbattribute.MarshalMap(color)
+	av, err := dynamodbattribute.MarshalMap(task)
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to marshal color"})
+		c.JSON(500, gin.H{"error": "Failed to marshal task"})
 		return
 	}
 
 	_, err = svc.PutItem(&dynamodb.PutItemInput{
-		TableName: aws.String("colors"),
+		TableName: aws.String("tasks"),
 		Item:      av,
 	})
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to add color", "message": err.Error()})
+		c.JSON(500, gin.H{"error": "Failed to add task", "message": err.Error()})
 		return
 	}
 
-	c.JSON(201, color)
+	c.JSON(201, task)
 }
 
-func DeleteColor(c *gin.Context) {
-	colorName := c.Param("name")
+func DeleteTask(c *gin.Context) {
+	taskId := c.Param("id")
 
 	sess, err := database.NewSession()
 	if err != nil {
@@ -53,40 +56,40 @@ func DeleteColor(c *gin.Context) {
 	svc := dynamodb.New(sess)
 
 	result, err := svc.GetItem(&dynamodb.GetItemInput{
-		TableName: aws.String("colors"),
+		TableName: aws.String("tasks"),
 		Key: map[string]*dynamodb.AttributeValue{
-			"name": {
-				S: aws.String(colorName),
+			"id": {
+				S: aws.String(taskId),
 			},
 		},
 	})
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to fetch color for deletion"})
+		c.JSON(500, gin.H{"error": "Failed to fetch task for deletion"})
 		return
 	}
 	if result.Item == nil {
-		c.JSON(404, gin.H{"error": "Color not found"})
+		c.JSON(404, gin.H{"error": "Task not found"})
 		return
 	}
 
 	_, err = svc.DeleteItem(&dynamodb.DeleteItemInput{
-		TableName: aws.String("colors"),
+		TableName: aws.String("tasks"),
 		Key: map[string]*dynamodb.AttributeValue{
-			"name": {
-				S: aws.String(colorName),
+			"id": {
+				S: aws.String(taskId),
 			},
 		},
 	})
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to delete color", "details": err.Error()})
+		c.JSON(500, gin.H{"error": "Failed to delete task", "details": err.Error()})
 		return
 	}
 
-	c.JSON(200, gin.H{"success": "Color deleted"})
+	c.JSON(200, gin.H{"success": "Task deleted"})
 }
 
-func GetColor(c *gin.Context) {
-	colorName := c.Param("name")
+func GetTask(c *gin.Context) {
+	taskId := c.Param("id")
 
 	sess, err := database.NewSession()
 	if err != nil {
@@ -96,33 +99,33 @@ func GetColor(c *gin.Context) {
 	svc := dynamodb.New(sess)
 
 	result, err := svc.GetItem(&dynamodb.GetItemInput{
-		TableName: aws.String("colors"),
+		TableName: aws.String("tasks"),
 		Key: map[string]*dynamodb.AttributeValue{
-			"name": {
-				S: aws.String(colorName),
+			"id": {
+				S: aws.String(taskId),
 			},
 		},
 	})
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to fetch color"})
+		c.JSON(500, gin.H{"error": "Failed to fetch task"})
 		return
 	}
 	if result.Item == nil {
-		c.JSON(404, gin.H{"error": "Color not found"})
+		c.JSON(404, gin.H{"error": "Task not found"})
 		return
 	}
 
-	var color models.Color
-	err = dynamodbattribute.UnmarshalMap(result.Item, &color)
+	var task models.Task
+	err = dynamodbattribute.UnmarshalMap(result.Item, &task)
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to unmarshal color"})
+		c.JSON(500, gin.H{"error": "Failed to unmarshal task"})
 		return
 	}
 
-	c.JSON(200, color)
+	c.JSON(200, task)
 }
 
-func GetColors(c *gin.Context) {
+func GetTasks(c *gin.Context) {
 	sess, err := database.NewSession()
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Failed to create AWS session"})
@@ -131,35 +134,35 @@ func GetColors(c *gin.Context) {
 	svc := dynamodb.New(sess)
 
 	result, err := svc.Scan(&dynamodb.ScanInput{
-		TableName: aws.String("colors"),
+		TableName: aws.String("tasks"),
 	})
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to fetch colors"})
+		c.JSON(500, gin.H{"error": "Failed to fetch tasks"})
 		return
 	}
 
-	var colors []models.Color
-	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &colors)
+	var tasks []models.Task
+	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &tasks)
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to unmarshal colors"})
+		c.JSON(500, gin.H{"error": "Failed to unmarshal tasks"})
 		return
 	}
 
-	c.JSON(200, colors)
+	c.JSON(200, tasks)
 }
 
-func UpdateColor(c *gin.Context) {
-	var color models.Color
+func UpdateTask(c *gin.Context) {
+	var task models.Task
 
-	if err := c.ShouldBindJSON(&color); err != nil {
+	if err := c.ShouldBindJSON(&task); err != nil {
 		c.JSON(400, gin.H{"error": "Invalid request format"})
 		return
 	}
 
-	colorName := c.Param("name")
+	taskId := c.Param("id")
 
-	if colorName != color.Name {
-		c.JSON(400, gin.H{"error": "Color name in URL does not match name in request body"})
+	if taskId != task.Id {
+		c.JSON(400, gin.H{"error": "task id in URL does not match id in request body"})
 		return
 	}
 
@@ -171,37 +174,37 @@ func UpdateColor(c *gin.Context) {
 	svc := dynamodb.New(sess)
 
 	result, err := svc.GetItem(&dynamodb.GetItemInput{
-		TableName: aws.String("colors"),
+		TableName: aws.String("tasks"),
 		Key: map[string]*dynamodb.AttributeValue{
-			"name": {
-				S: aws.String(colorName),
+			"id": {
+				S: aws.String(taskId),
 			},
 		},
 	})
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Error checking if color exists"})
+		c.JSON(500, gin.H{"error": "Error checking if task exists"})
 		return
 	}
 
 	if result.Item == nil {
-		c.JSON(404, gin.H{"error": "Color not found"})
+		c.JSON(404, gin.H{"error": "Task not found"})
 		return
 	}
 
-	av, err := dynamodbattribute.MarshalMap(color)
+	av, err := dynamodbattribute.MarshalMap(task)
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to marshal color"})
+		c.JSON(500, gin.H{"error": "Failed to marshal task"})
 		return
 	}
 
 	_, err = svc.PutItem(&dynamodb.PutItemInput{
-		TableName: aws.String("colors"),
+		TableName: aws.String("tasks"),
 		Item:      av,
 	})
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to update color", "details": err.Error()})
+		c.JSON(500, gin.H{"error": "Failed to update task", "details": err.Error()})
 		return
 	}
 
-	c.JSON(200, color)
+	c.JSON(200, task)
 }

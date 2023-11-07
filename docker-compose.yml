@@ -12,8 +12,6 @@ services:
       - ./:/app
     working_dir: '/app'
     command: '/bin/air'
-    networks:
-      - goDynamoApi
 
   dynamodb:
     build:
@@ -26,13 +24,6 @@ services:
     working_dir: /home/dynamodblocal
     command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
     env_file: .env
-    networks:
-      - goDynamoApi
 
 volumes:
     dynamo_data:
-
-networks:
-  goDynamoApi:
-    ipam:
-      driver: default

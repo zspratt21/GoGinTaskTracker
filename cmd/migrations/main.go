@@ -12,7 +12,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	err := migrations.CreateColorsTable()
+	err := migrations.CreateTasksTable()
 	if err != nil {
 		fmt.Print(err)
 		return

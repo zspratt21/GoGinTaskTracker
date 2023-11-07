@@ -2,15 +2,16 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func SetupRouter(router *gin.Engine) *gin.Engine {
-	router.GET("", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"message": "hello world!"})
+	router.LoadHTMLGlob("templates/*")
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(200, "welcome.html", nil)
 	})
-	colors := router.Group("/colors")
-	ColorRoutes(colors)
+
+	tasks := router.Group("/api/Tasks")
+	TaskRoutes(tasks)
 
 	return router
 }
