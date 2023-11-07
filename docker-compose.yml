@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  go:
+    build:
+      context: .
+      dockerfile: docker/go/Dockerfile
+    env_file: .env
+    ports:
+      - "${GO_PORT:-9000}:${GO_PORT:-9000}"
+    volumes:
+      - ./:/app
+    working_dir: '/app'
+    command: '/bin/air'
+    networks:
+      - goDynamoApi
+
+  dynamodb:
+    build:
+        context: docker/dynamodb/
+        dockerfile: Dockerfile
+    ports:
+      - "${DYNAMO_PORT:-8000}:8000"
+    volumes:
+      - dynamo_data:/home/dynamodblocal/data
+    working_dir: /home/dynamodblocal
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    env_file: .env
+    networks:
+      - goDynamoApi
+
+volumes:
+    dynamo_data:
+
+networks:
+  goDynamoApi:
+    ipam:
+      driver: default

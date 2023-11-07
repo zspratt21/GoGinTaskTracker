@@ -1,0 +1,13 @@
+# Ide files
+.idea
+
+# Env
+.env
+migration.env
+
+# Build and Bin
+build
+tmp
+
+# Keep
+!.gitkeep
