@@ -1,4 +1,4 @@
-# Go Gin DynamoDB API Template
+# Go Gin Task Tracker
 An API for tracking tasks, built using Golang and the Gin web framework.
 
 ## Getting Started
