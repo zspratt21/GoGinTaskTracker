@@ -10,6 +10,7 @@ import (
 func TestTaskJSONMarshaling(t *testing.T) {
 	task := Task{
 		Name:        "Task 1",
+		Description: "This is a task",
 		IsCompleted: false,
 	}
 
@@ -24,7 +25,7 @@ func TestTaskJSONMarshaling(t *testing.T) {
 }
 
 func TestTaskJSONUnmarshaling(t *testing.T) {
-	jsonString := `{"name":"Task 2","isCompleted": true}`
+	jsonString := `{"name":"Task 2","isCompleted": true, "description": "This is another task"}`
 
 	var task Task
 	err := json.Unmarshal([]byte(jsonString), &task)
